@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+    margin: 0;
+}
+
+#home, #quiz {
+    text-align: center;
+}
+
+#question-container {
+    margin-bottom: 20px;
+}
+
+.btn-container {
+    display: flex;
+    flex-direction: column;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.correct {
+    background-color: green !important;
+}
+
+.wrong {
+    background-color: red !important;
+}
+
+.next-btn {
+    display: none;
+}
+
+    </style>
+</head>
+<body>
+    <div id="home">
+        <h1>Welcome to the Quiz App</h1>
+        <p>Highest Score: <span id="highest-score">0</span></p>
+        <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div id="quiz" style="display: none;">
+        <div id="question-container">
+            <div id="question"></div>
+            <div id="answer-buttons" class="btn-container"></div>
+        </div>
+        <button id="next-btn" onclick="handleNextButton()" class="next-btn">Next</button>
+    </div>
+
+    <script src="script.js">
+        const questions = [
+    {
+        question: 'What is the capital of France?',
+        answers: [
+            { text: 'Berlin', correct: false },
+            { text: 'Madrid', correct: false },
+            { text: 'Paris', correct: true },
+            { text: 'Lisbon', correct: false }
+        ]
+    },
+    {
+        question: 'Who is CEO of Tesla?',
+        answers: [
+            { text: 'Jeff Bezos', correct: false },
+            { text: 'Elon Musk', correct: true },
+            { text: 'Bill Gates', correct: false },
+            { text: 'Tony Stark', correct: false }
+        ]
+    },
+    // Add more questions here
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+let highestScore = 0;
+
+const homeDiv = document.getElementById('home');
+const quizDiv = document.getElementById('quiz');
+const questionContainer = document.getElementById('question-container');
+const questionElement = document.getElementById('question');
+const answerButtonsElement = document.getElementById('answer-buttons');
+const nextButton = document.getElementById('next-btn');
+const highestScoreElement = document.getElementById('highest-score');
+
+function startQuiz() {
+    homeDiv.style.display = 'none';
+    quizDiv.style.display = 'block';
+    currentQuestionIndex = 0;
+    score = 0;
+    nextButton.textContent = 'Next';
+    nextButton.style.display = 'none';
+    setNextQuestion();
+}
+
+function setNextQuestion() {
+    resetState();
+    showQuestion(questions[currentQuestionIndex]);
+}
+
+function showQuestion(question) {
+    questionElement.textContent = question.question;
+    question.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.textContent = answer.text;
+        button.classList.add('btn');
+        if (answer.correct) {
+            button.dataset.correct = answer.correct;
+        }
+        button.addEventListener('click', selectAnswer);
+        answerButtonsElement.appendChild(button);
+    });
+}
+
+function resetState() {
+    clearStatusClass(document.body);
+    nextButton.style.display = 'none';
+    while (answerButtonsElement.firstChild) {
+        answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+    }
+}
+
+function selectAnswer(e) {
+    const selectedButton = e.target;
+    const correct = selectedButton.dataset.correct === 'true';
+    setStatusClass(document.body, correct);
+    Array.from(answerButtonsElement.children).forEach(button => {
+        setStatusClass(button, button.dataset.correct === 'true');
+    });
+    if (correct) {
+        score++;
+    }
+    if (questions.length > currentQuestionIndex + 1) {
+        nextButton.style.display = 'block';
+    } else {
+        nextButton.textContent = 'Home';
+        nextButton.style.display = 'block';
+    }
+}
+
+function setStatusClass(element, correct) {
+    clearStatusClass(element);
+    if (correct) {
+        element.classList.add('correct');
+    } else {
+        element.classList.add('wrong');
+    }
+}
+
+function clearStatusClass(element) {
+    element.classList.remove('correct');
+    element.classList.remove('wrong');
+}
+
+nextButton.addEventListener('click', () => {
+    if (nextButton.textContent === 'Home') {
+        if (score > highestScore) {
+            highestScore = score;
+            highestScoreElement.textContent = highestScore;
+        }
+        quizDiv.style.display = 'none';
+        homeDiv.style.display = 'block';
+    } else {
+        currentQuestionIndex++;
+        setNextQuestion();
+    }
+});
+
+
+    </script>
+</body>
+</html>
